@@ -56,3 +56,4 @@ As is, the code has default configuration, pointing to the developer's region. Y
 will need to change the pool id, region, and dynamodb table id. You can find these
 configurations in ```aws.service.ts``` and ```cognito.service.ts```
 
+# changes of Wilson M. Narea
