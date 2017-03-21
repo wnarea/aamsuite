@@ -1,0 +1,114 @@
+<ng2-slim-loading-bar></ng2-slim-loading-bar>
+<h1 class="page-header">{{resource.displayName}}</h1>
+<p>{{resource.description}}</p>
+
+<div class="table-responsive">
+    <ul class="breadcrumb">
+        <li><a [routerLink]="['/securehome/s3', {'resourceid': resource?.id}]">All</a></li>
+        <li *ngFor="let b of breadcrumb; let i = index">
+            <a [routerLink]="['/securehome/s3', {'prefix': b.prefix}]">{{b.name}}</a>
+        </li>
+    </ul>
+    <modal #uploadModal>
+        <modal-header [show-close]="true">
+            <h4 class="modal-title">Create New Folder</h4>
+        </modal-header>
+        <modal-body>
+            <form [formGroup]="createFolderForm" class="form-inline">
+                <div class="form-group">
+                    <label for="folderName">Name</label>
+                    <input type="text" class="form-control" id="folderName" formControlName="folderName">
+                </div>
+            </form>
+        </modal-body>
+        <modal-footer>
+            <button type="button" class="btn btn-default" data-dismiss="modal" (click)="uploadModal.dismiss()">Cancel</button>
+            <button type="button" class="btn btn-primary" [disabled]="!createFolderForm.valid" (click)="newFolderSubmit()">Create</button>
+        </modal-footer>
+    </modal>
+    <table class="table table-hover table-striped">
+        <tr>
+            <th>Nombre</th>
+            <th class="text-right">Tamaño</th>
+            <th>Creado</th>
+            <th></th>
+            <th></th>
+        </tr>
+        <tr *ngFor="let item of bucketData" class="active">
+            <td>
+                <template [ngIf]="item.isContainer">
+                    <a><i class="fa fa-folder"></i> </a>
+                    <a [routerLink]="['/securehome/s3', {'prefix': item.prefix}]">{{ item.name }}</a>
+                </template>
+                <template [ngIf]="!item.isContainer">
+                    <a [ngSwitch]="item.extension">
+                        <i *ngSwitchCase="'xlsx'" class="fa fa-file-excel-o"></i>
+                        <i *ngSwitchCase="'xls'" class="fa fa-file-excel-o"></i>
+                        <i *ngSwitchCase="'pdf'" class="fa fa-file-pdf-o"></i>
+                        <i *ngSwitchDefault class="fa fa-file-text"></i>
+                    </a>
+                    {{ item.name }}
+                </template>
+                <template [ngIf]="item.name === displayNameHighlighted">
+                    <span class="label label-warning">new</span>
+                </template>
+
+            </td>
+            <td class="text-right">
+                <template [ngIf]="!item.isContainer">
+                    {{ item.size | filesize }}
+                </template>
+            </td>
+            <td class="text-left">
+                <template [ngIf]="!item.isContainer">
+                    <!--{{ item.lastModified | amTimeAgo }}-->
+                    {{ item.lastModified | date: 'dd/MM/yyyy h:mm a'}}
+                </template>
+            </td>
+            <td style="width: 80px;">
+                <template [ngIf]="!item.isContainer">
+                    <button (click)="downloadFile(item)"><i class="fa fa-download" aria-hidden="true"></i></button>
+                    <template [ngIf]="item.busy">
+                        <img src="/assets/img/rolling.gif" alt="Downloading ..." />
+                    </template>
+                </template>
+            </td>
+            <td>
+                <template [ngIf]="!item.isContainer && resource.removable()">
+                    <button (click)="removeFile(item)"><i class="fa fa-trash"></i></button>
+                </template>
+            </td>
+        </tr>
+    </table>
+
+</div>
+<footer>
+    <div class="navbar navbar-inverse navbar-fixed-bottom">
+        <div class="container">
+            <div class="navbar-collapse collapse" id="footer-body">
+                <ul class="nav navbar-nav">
+                    <li><a (click)="showNewFolderModal()" [class.disabled]="!resource.allowCreateFolder()"><i class="fa fa-folder-open"></i> New Folder</a></li>
+                    <li>
+                        <a (click)="showFileSelector()" [class.disabled]="!resource.allowCreateFolder()">
+                            <i class="fa fa-upload"></i> Upload
+                            <input type="file" id="fileInput" style="display: none" (change)="fileEvent($event)"/>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#footer-body">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <!--<ul class="footer-bar-btns visible-xs">-->
+                    <!--<li><a href="#" class="btn" title="History"><i class="fa fa-2x fa-clock-o blue-text"></i></a></li>-->
+                    <!--<li><a href="#" class="btn" title="Favourites"><i class="fa fa-2x fa-star yellow-text"></i></a></li>-->
+                    <!--<li><a href="#" class="btn" title="Subscriptions"><i class="fa fa-2x fa-rss-square orange-text"></i></a></li>-->
+                <!--</ul>-->
+            </div>
+
+        </div>
+    </div>
+</footer>
